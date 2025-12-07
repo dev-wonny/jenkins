@@ -42,7 +42,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh """
-                    docker build -t ${IMAGE_NAME}:${TAG} .
+                    docker build -t ${env.IMAGE}:${env.TAG} .
                 """
             }
         }
@@ -62,7 +62,7 @@ pipeline {
         stage('Push Image to DockerHub') {
             steps {
                 sh """
-                    docker push ${IMAGE_NAME}:${TAG}
+                    docker push ${env.IMAGE}:${env.TAG}
                 """
             }
         }
@@ -78,12 +78,12 @@ pipeline {
                 //     docker run -d -p 3000:3000 --name jenkins-app devwonny/jenkins-test:latest
                 // """
                 sh """
-                    docker pull ${IMAGE}:${TAG}
+                    docker pull ${env.IMAGE}:${env.TAG}
 
                     docker stop jenkins-app || true
                     docker rm jenkins-app || true
 
-                    docker run -d -p 3000:3000 --name jenkins-app ${IMAGE}:${TAG}
+                    docker run -d -p 3000:3000 --name jenkins-app ${env.IMAGE}:${env.TAG}
                 """
 
                 // Health check
