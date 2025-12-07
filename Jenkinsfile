@@ -70,7 +70,13 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo '🚀 Deploying...'
-            // 예: SSH로 서버 접속 → docker run 재시작
+                // 예: SSH로 서버 접속 → docker run 재시작
+                sh '''
+            docker pull devwonny/jenkins-test:latest
+            docker stop jenkins-app || true
+            docker rm jenkins-app || true
+            docker run -d -p 3000:3000 --name jenkins-app devwonny/jenkins-test:latest
+        '''
             }
         }
     }
