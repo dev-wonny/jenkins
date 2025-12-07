@@ -1,17 +1,20 @@
 pipeline {
     agent any
-    
+
     triggers {
         githubPush()
     }
 
     environment {
-        // Jenkins Credentials ID
-        DOCKERHUB = credentials('dockerhub')
+        // // Jenkins Credentials ID
+        // echo "${DOCKERHUB_PSW}" | docker login - u "${DOCKERHUB_USR}" - password - stdin
+        // DOCKERHUB = credentials('dockerhub')
 
-        // Docker Hub repo (본인 계정명/레포명)
-        IMAGE_NAME = "devwonny/jenkins-test"
-        TAG = "latest"
+        // // Docker Hub repo (본인 계정명/레포명)
+        // IMAGE_NAME = 'devwonny/jenkins-test'
+        // TAG = 'latest'
+        IMAGE_NAME = 'devwonny/jenkins-test'
+        TAG = 'latest'
     }
 
     stages {
@@ -24,15 +27,15 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo "🔨 Building..."
-                // 예시: npm install, gradle build 등
+                echo '🔨 Building...'
+            // 예시: npm install, gradle build 등
             }
         }
 
         stage('Test') {
             steps {
-                echo "🧪 Running tests..."
-                // 예시: npm test, gradle test 등
+                echo '🧪 Running tests...'
+            // 예시: npm test, gradle test 등
             }
         }
 
@@ -46,9 +49,13 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                sh """
-                    echo "${DOCKERHUB_PSW}" | docker login -u "${DOCKERHUB_USR}" --password-stdin
-                """
+                withCredentials([usernamePassword(credentialsId: 'dockerhub',
+                                          usernameVariable: 'DOCKER_USER',
+                                          passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
+            """
+                                          }
             }
         }
 
@@ -62,8 +69,8 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "🚀 Deploying..."
-                // 예: SSH로 서버 접속 → docker run 재시작
+                echo '🚀 Deploying...'
+            // 예: SSH로 서버 접속 → docker run 재시작
             }
         }
     }
