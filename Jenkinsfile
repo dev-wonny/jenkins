@@ -39,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
                 sh """
                     docker build -t ${IMAGE_NAME}:${TAG} .
@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Docker Login') {
+        stage('Login DockerHub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub',
                                           usernameVariable: 'DOCKER_USER',
@@ -59,7 +59,7 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
+        stage('Push Image to DockerHub') {
             steps {
                 sh """
                     docker push ${IMAGE_NAME}:${TAG}
@@ -71,12 +71,27 @@ pipeline {
             steps {
                 echo '🚀 Deploying...'
                 // 예: SSH로 서버 접속 → docker run 재시작
+                //         sh """
+                //     docker pull devwonny/jenkins-test:latest
+                //     docker stop jenkins-app || true
+                //     docker rm jenkins-app || true
+                //     docker run -d -p 3000:3000 --name jenkins-app devwonny/jenkins-test:latest
+                // """
+                sh """
+                    docker pull ${IMAGE}:${TAG}
+
+                    docker stop jenkins-app || true
+                    docker rm jenkins-app || true
+
+                    docker run -d -p 3000:3000 --name jenkins-app ${IMAGE}:${TAG}
+                """
+
+                // Health check
                 sh '''
-            docker pull devwonny/jenkins-test:latest
-            docker stop jenkins-app || true
-            docker rm jenkins-app || true
-            docker run -d -p 3000:3000 --name jenkins-app devwonny/jenkins-test:latest
-        '''
+                    echo "Checking Health..."
+                    sleep 3
+                    curl -f http://localhost:3000/health
+                '''
             }
         }
     }
