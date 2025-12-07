@@ -66,16 +66,20 @@ pipeline {
                 echo '🚀 Deploying...'
                 sh """
                     docker pull ${env.IMAGE_NAME}:${env.TAG}
+
                     docker stop jenkins-app || true
                     docker rm jenkins-app || true
-                    docker run -d -p 3000:3000 --name jenkins-app ${env.IMAGE_NAME}:${env.TAG}
+
+                    docker run -d -p 3000:3000 \
+                        --name jenkins-app \
+                        ${env.IMAGE_NAME}:${env.TAG}
                 """
 
                 // health check
                 sh '''
                     echo "Checking Health..."
                     sleep 3
-                    curl -f http://localhost:3000/health
+                    curl -f http://host.docker.internal:3000/health
                 '''
             }
         }
